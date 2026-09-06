@@ -1,4 +1,4 @@
-name: Build FakeClock IPA
+ name: Build FakeClock IPA
 
   on:
     push:
