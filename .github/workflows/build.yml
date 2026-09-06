@@ -1,4 +1,4 @@
- name: Build FakeClock IPA
+name: Build FakeClock IPA
 
   on:
     push:
@@ -17,72 +17,69 @@
             APP_DIR="build/Release-iphoneos/FakeClock.app"
             mkdir -p "$APP_DIR"
 
-            # Compile Swift sources
             xcrun -sdk iphoneos swiftc FakeClock/*.swift \
               -target arm64-apple-ios17.0 \
               -o "$APP_DIR/FakeClock"
 
-            # Info.plist
             cat << 'EOF' > "$APP_DIR/Info.plist"
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
             <dict>
-                <key>CFBundleExecutable</key>
-                <string>FakeClock</string>
-                <key>CFBundleIdentifier</key>
-                <string>com.fakeclock.app</string>
-                <key>CFBundleName</key>
-                <string>Clock</string>
-                <key>CFBundleDisplayName</key>
-                <string>Clock</string>
-                <key>CFBundlePackageType</key>
-                <string>APPL</string>
-                <key>CFBundleShortVersionString</key>
-                <string>1.0</string>
-                <key>CFBundleVersion</key>
-                <string>1</string>
-                <key>LSRequiresIPhoneOS</key>
-                <true/>
-                <key>NSFaceIDUsageDescription</key>
-                <string>Unlock Timer</string>
-                <key>UILaunchStoryboardName</key>
-                <string>LaunchScreen</string>
-                <key>UIRequiredDeviceCapabilities</key>
-                <array>
-                    <string>arm64</string>
-                </array>
-                <key>UISupportedInterfaceOrientations</key>
-                <array>
-                    <string>UIInterfaceOrientationPortrait</string>
-                </array>
+              <key>CFBundleExecutable</key>
+              <string>FakeClock</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.fakeclock.app</string>
+              <key>CFBundleName</key>
+              <string>Clock</string>
+              <key>CFBundleDisplayName</key>
+              <string>Clock</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>LSRequiresIPhoneOS</key>
+              <true/>
+              <key>NSFaceIDUsageDescription</key>
+              <string>Unlock Timer</string>
+              <key>UILaunchStoryboardName</key>
+              <string>LaunchScreen</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                <string>arm64</string>
+              </array>
+              <key>UISupportedInterfaceOrientations</key>
+              <array>
+                <string>UIInterfaceOrientationPortrait</string>
+              </array>
             </dict>
             </plist>
             EOF
 
-            # Create a minimal compiled LaunchScreen storyboard
-            mkdir -p "$APP_DIR/Base.lproj/LaunchScreen.storyboardc"
+            mkdir -p "$APP_DIR/Base.lproj"
 
             cat << 'STORYBOARD' > /tmp/LaunchScreen.storyboard
             <?xml version="1.0" encoding="UTF-8"?>
             <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="AppleSDK" targetFramework="UIKit"
   propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-                <scenes>
-                    <scene sceneID="EHf-IW-A2E">
-                        <objects>
-                            <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                                <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                    <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                                </view>
-                            </viewController>
-                            <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                        </objects>
-                        <point key="canvasLocation" x="53" y="375"/>
-                    </scene>
-                </scenes>
+              <scenes>
+                <scene sceneID="EHf-IW-A2E">
+                  <objects>
+                    <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                      <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                      </view>
+                    </viewController>
+                    <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                  </objects>
+                  <point key="canvasLocation" x="53" y="375"/>
+                </scene>
+              </scenes>
             </document>
             STORYBOARD
 
