@@ -1,0 +1,109 @@
+name: Build FakeClock IPA
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Show Xcode Version
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Create Xcode Project
+        run: |
+          cat > project.yml <<'EOF'
+          name: FakeClock
+
+          options:
+            bundleIdPrefix: com.fakeclock
+            deploymentTarget:
+              iOS: "17.0"
+
+          targets:
+            FakeClock:
+              type: application
+              platform: iOS
+
+              sources:
+                - path: FakeClock
+
+              settings:
+                PRODUCT_BUNDLE_IDENTIFIER: com.fakeclock.app
+                PRODUCT_NAME: FakeClock
+                INFOPLIST_KEY_CFBundleDisplayName: Clock
+                INFOPLIST_KEY_LSRequiresIPhoneOS: YES
+                SWIFT_VERSION: 5.0
+                IPHONEOS_DEPLOYMENT_TARGET: 17.0
+                TARGETED_DEVICE_FAMILY: "1"
+                CODE_SIGNING_ALLOWED: NO
+                CODE_SIGNING_REQUIRED: NO
+                CODE_SIGN_IDENTITY: ""
+
+              info:
+                path: FakeClock/Info.plist
+                properties:
+                  CFBundleDisplayName: Clock
+                  CFBundleName: Clock
+                  CFBundlePackageType: APPL
+                  LSRequiresIPhoneOS: true
+                  UILaunchScreen: {}
+
+          EOF
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          xcodegen generate
+
+      - name: Build iOS App
+        run: |
+          xcodebuild \
+            -project FakeClock.xcodeproj \
+            -scheme FakeClock \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            clean build \
+            CONFIGURATION_BUILD_DIR="$PWD/build"
+
+      - name: Verify App
+        run: |
+          ls -la build
+          test -d build/FakeClock.app
+          test -f build/FakeClock.app/FakeClock
+
+      - name: Package IPA
+        run: |
+          rm -rf Payload FakeClock.ipa
+          mkdir Payload
+          cp -R build/FakeClock.app Payload/FakeClock.app
+
+          cd Payload
+          zip -r ../FakeClock.ipa FakeClock.app
+          cd ..
+
+          unzip -l FakeClock.ipa | head -30
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: FakeClock-IPA
+          path: FakeClock.ipa
+          if-no-files-found: error
