@@ -1,99 +1,72 @@
 name: Build FakeClock IPA
 
 on:
-    push:
-      branches: [ main, master ]
-    workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
 
-  jobs:
-    build:
-      runs-on: macos-14
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v4
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-        - name: Build FakeClock App
-          run: |
-            APP_DIR="build/Release-iphoneos/FakeClock.app"
-            mkdir -p "$APP_DIR"
+      - name: Build App
+        run: |
+          APP="build/FakeClock.app"
+          mkdir -p "$APP/Base.lproj"
+          xcrun -sdk iphoneos swiftc FakeClock/*.swift -target arm64-apple-ios17.0 -o "$APP/FakeClock"
 
-            xcrun -sdk iphoneos swiftc FakeClock/*.swift \
-              -target arm64-apple-ios17.0 \
-              -o "$APP_DIR/FakeClock"
+      - name: Create Info.plist
+        run: |
+          /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string FakeClock" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.fakeclock.app" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleName string Clock" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Clock" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string APPL" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 1.0" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string 1" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :LSRequiresIPhoneOS bool true" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'Unlock Timer'" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UILaunchStoryboardName string LaunchScreen" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UIRequiredDeviceCapabilities array" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UIRequiredDeviceCapabilities:0 string arm64" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations array" build/FakeClock.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" build/FakeClock.app/Info.plist
 
-            cat << 'EOF' > "$APP_DIR/Info.plist"
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>CFBundleExecutable</key>
-              <string>FakeClock</string>
-              <key>CFBundleIdentifier</key>
-              <string>com.fakeclock.app</string>
-              <key>CFBundleName</key>
-              <string>Clock</string>
-              <key>CFBundleDisplayName</key>
-              <string>Clock</string>
-              <key>CFBundlePackageType</key>
-              <string>APPL</string>
-              <key>CFBundleShortVersionString</key>
-              <string>1.0</string>
-              <key>CFBundleVersion</key>
-              <string>1</string>
-              <key>LSRequiresIPhoneOS</key>
-              <true/>
-              <key>NSFaceIDUsageDescription</key>
-              <string>Unlock Timer</string>
-              <key>UILaunchStoryboardName</key>
-              <string>LaunchScreen</string>
-              <key>UIRequiredDeviceCapabilities</key>
-              <array>
-                <string>arm64</string>
-              </array>
-              <key>UISupportedInterfaceOrientations</key>
-              <array>
-                <string>UIInterfaceOrientationPortrait</string>
-              </array>
-            </dict>
-            </plist>
-            EOF
+      - name: Create LaunchScreen
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > /tmp/LaunchScreen.storyboard
+          echo '<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="AppleSDK" targetFramework="UIKit" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">' >> /tmp/LaunchScreen.storyboard
+          echo '  <scenes>' >> /tmp/LaunchScreen.storyboard
+          echo '    <scene sceneID="EHf-IW-A2E">' >> /tmp/LaunchScreen.storyboard
+          echo '      <objects>' >> /tmp/LaunchScreen.storyboard
+          echo '        <viewController id="01J-lp-oVM" sceneMemberID="viewController">' >> /tmp/LaunchScreen.storyboard
+          echo '          <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">' >> /tmp/LaunchScreen.storyboard
+          echo '            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>' >> /tmp/LaunchScreen.storyboard
+          echo '            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>' >> /tmp/LaunchScreen.storyboard
+          echo '            <color key="backgroundColor" systemColor="systemBackgroundColor"/>' >> /tmp/LaunchScreen.storyboard
+          echo '            <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>' >> /tmp/LaunchScreen.storyboard
+          echo '          </view>' >> /tmp/LaunchScreen.storyboard
+          echo '        </viewController>' >> /tmp/LaunchScreen.storyboard
+          echo '        <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>' >> /tmp/LaunchScreen.storyboard
+          echo '      </objects>' >> /tmp/LaunchScreen.storyboard
+          echo '      <point key="canvasLocation" x="53" y="375"/>' >> /tmp/LaunchScreen.storyboard
+          echo '    </scene>' >> /tmp/LaunchScreen.storyboard
+          echo '  </scenes>' >> /tmp/LaunchScreen.storyboard
+          echo '</document>' >> /tmp/LaunchScreen.storyboard
+          xcrun ibtool --compile build/FakeClock.app/Base.lproj/LaunchScreen.storyboardc /tmp/LaunchScreen.storyboard --target-device iphone --minimum-deployment-target 17.0
 
-            mkdir -p "$APP_DIR/Base.lproj"
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/FakeClock.app Payload/
+          zip -r FakeClock.ipa Payload
+          rm -rf Payload
 
-            cat << 'STORYBOARD' > /tmp/LaunchScreen.storyboard
-            <?xml version="1.0" encoding="UTF-8"?>
-            <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="AppleSDK" targetFramework="UIKit"
-  propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-              <scenes>
-                <scene sceneID="EHf-IW-A2E">
-                  <objects>
-                    <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                      <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                      </view>
-                    </viewController>
-                    <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                  </objects>
-                  <point key="canvasLocation" x="53" y="375"/>
-                </scene>
-              </scenes>
-            </document>
-            STORYBOARD
-
-            xcrun ibtool --compile "$APP_DIR/Base.lproj/LaunchScreen.storyboardc" /tmp/LaunchScreen.storyboard --target-device iphone --minimum-deployment-target 17.0
-
-        - name: Package IPA
-          run: |
-            mkdir -p Payload
-            cp -r build/Release-iphoneos/FakeClock.app Payload/
-            zip -r FakeClock.ipa Payload
-            rm -rf Payload
-
-        - name: Upload IPA Artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: FakeClock-IPA
-            path: FakeClock.ipa
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FakeClock-IPA
+          path: FakeClock.ipa
